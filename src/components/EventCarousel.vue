@@ -169,14 +169,21 @@ async function connectWallet() {
 }
 
 async function mintTicket() {
-  const payload = {
-    walletAddress: direccionWallet.value,
-    event: selectedEvent.title,
-    zone: zonaSeleccionada.value,
-    seat: asientoSeleccionado.value,
-    price: selectedEvent.price,
-  }
+  const priceNumber = parseFloat(selectedEvent.price.replace(' ETH', ''));
 
+  const payload = {
+    wallet_address: direccionWallet.value,
+    event_data: {
+      eventName: selectedEvent.title,
+      date: selectedEvent.date,
+      zone: zonaSeleccionada.value,
+      seat: asientoSeleccionado.value,
+      price: priceNumber
+    }
+  };
+
+  console.log("Payload a enviar:", JSON.stringify(payload));
+  
   try {
     const res = await fetch(`${BACKEND_URL}/tickets/mint`, {
       method: 'POST',
