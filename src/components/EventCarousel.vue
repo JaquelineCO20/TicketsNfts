@@ -168,7 +168,26 @@ async function connectWallet() {
   }
 }
 
-async function mintTicket() {
+// Función para enviar la transacción de pago a MetaMask
+async function payTicket(priceETH) {
+  if (!direccionWallet.value) throw new Error('Wallet no conectada')
+
+  const transactionParameters = {
+    to: '0xf1D13E46fDf4Fe616fEEF543C9A9Dd8bBc3d7c16', // REEMPLAZA por dirección correcta
+    from: direccionWallet.value,
+    value: '0x' + (parseFloat(priceETH) * 1e18).toString(16), // Convertir ETH a wei en hex
+  }
+
+  const txHash = await window.ethereum.request({
+    method: 'eth_sendTransaction',
+    params: [transactionParameters],
+  })
+
+  return txHash
+}
+
+// Función que llama al backend para mintear el ticket
+async function mintTicket(txHash) {
   const priceNumber = parseFloat(selectedEvent.price.replace(' ETH', ''))
 
   const payload = {
@@ -179,10 +198,9 @@ async function mintTicket() {
       zone: zonaSeleccionada.value,
       seat: asientoSeleccionado.value,
       price: priceNumber,
+      txHash: txHash,
     },
   }
-
-  console.log('Payload a enviar:', JSON.stringify(payload))
 
   try {
     const res = await fetch(`${BACKEND_URL}/tickets/mint`, {
@@ -191,10 +209,9 @@ async function mintTicket() {
       body: JSON.stringify(payload),
     })
     if (!res.ok) throw new Error('Error minteando ticket')
-    const data = await res.json()
-    mensaje.value = 'Ticket minteado con éxito.'
+    await res.json()
   } catch (error) {
-    mensaje.value = 'Error al mintear ticket: ' + error.message
+    throw error
   }
 }
 
@@ -242,9 +259,20 @@ const confirmarCompra = async () => {
     mensaje.value = 'Este asiento ya está vendido, selecciona otro.'
     return
   }
-  asientosVendidos.add(key)
 
-  await mintTicket()
+  try {
+    mensaje.value = 'Enviando transacción de pago...'
+    const txHash = await payTicket(selectedEvent.price.replace(' ETH', ''))
+    mensaje.value = 'Pago enviado. Transacción: ${txHash}. Minteando ticket...'
+
+    asientosVendidos.add(key)
+
+    await mintTicket(txHash)
+
+    mensaje.value = 'Ticket minteado con éxito.'
+  } catch (error) {
+    mensaje.value = 'Error en compra: ' + error.message
+  }
 }
 
 const cargarAsientos = () => {
