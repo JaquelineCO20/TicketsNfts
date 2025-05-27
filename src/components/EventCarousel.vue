@@ -2,6 +2,8 @@
 import { ref, reactive, computed } from 'vue'
 import EventCard from './EventCard.vue'
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
+
 const carousel = ref(null)
 const scrollLeft = () => carousel.value.scrollBy({ left: -220, behavior: 'smooth' })
 const scrollRight = () => carousel.value.scrollBy({ left: 220, behavior: 'smooth' })
@@ -143,6 +145,13 @@ async function checkWalletConnection() {
 }
 checkWalletConnection()
 
+// Escuchar cambios en cuentas de MetaMask para actualizar estado wallet
+if (window.ethereum) {
+  window.ethereum.on('accountsChanged', (accounts) => {
+    direccionWallet.value = accounts.length > 0 ? accounts[0] : null
+  })
+}
+
 const isWalletConnected = computed(() => direccionWallet.value !== null)
 
 async function connectWallet() {
@@ -156,6 +165,29 @@ async function connectWallet() {
     }
   } else {
     alert('MetaMask no está instalado')
+  }
+}
+
+async function mintTicket() {
+  const payload = {
+    walletAddress: direccionWallet.value,
+    event: selectedEvent.title,
+    zone: zonaSeleccionada.value,
+    seat: asientoSeleccionado.value,
+    price: selectedEvent.price,
+  }
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/tickets/mint`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    if (!res.ok) throw new Error('Error minteando ticket')
+    const data = await res.json()
+    mensaje.value = 'Ticket minteado con éxito.'
+  } catch (error) {
+    mensaje.value = 'Error al mintear ticket: ' + error.message
   }
 }
 
@@ -192,7 +224,7 @@ const isAsientoDisponible = (zonaId, asiento) => {
   return !asientosVendidos.has(`${zonaId}-${asiento}`)
 }
 
-const confirmarCompra = () => {
+const confirmarCompra = async () => {
   if (!zonaSeleccionada.value || !asientoSeleccionado.value) return
   if (!isWalletConnected.value) {
     showLoginModal.value = true
@@ -204,7 +236,8 @@ const confirmarCompra = () => {
     return
   }
   asientosVendidos.add(key)
-  mensaje.value = `Compra confirmada: Zona ${zonaSeleccionada.value}, asiento ${asientoSeleccionado.value}`
+
+  await mintTicket()
 }
 
 const cargarAsientos = () => {
