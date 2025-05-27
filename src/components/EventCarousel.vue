@@ -65,7 +65,7 @@ const showLoginModal = ref(false)
 const selectedEvent = reactive({ title: '', subtitle: '', date: '', image: '', price: '' })
 
 const zonas = [
-  { id: 'platino', nombre: 'Platino', asientos: [124, 125, 126, 132, 133, 134] },
+  { id: 'platino', nombre: 'Platino', asientos: ['124', '125', '126', '132', '133', '134'] },
   {
     id: 'oro',
     nombre: 'Oro',
@@ -127,7 +127,7 @@ const zonas = [
     nombre: 'Luneta Especial',
     asientos: ['109r', '110r', '111r', '112r', '113r', '114r', '115r', '116r'],
   },
-  { id: 'balcon', nombre: 'Balcón', asientos: [407, 408, 409, 410, 411, 412, 413] },
+  { id: 'balcon', nombre: 'Balcón', asientos: ['407', '408', '409', '410', '411', '412', '413'] },
 ]
 
 const zonaSeleccionada = ref('')
@@ -169,7 +169,7 @@ async function connectWallet() {
 }
 
 async function mintTicket() {
-  const priceNumber = parseFloat(selectedEvent.price.replace(' ETH', ''));
+  const priceNumber = parseFloat(selectedEvent.price.replace(' ETH', ''))
 
   const payload = {
     wallet_address: direccionWallet.value,
@@ -178,12 +178,12 @@ async function mintTicket() {
       date: selectedEvent.date,
       zone: zonaSeleccionada.value,
       seat: asientoSeleccionado.value,
-      price: priceNumber
-    }
-  };
+      price: priceNumber,
+    },
+  }
 
-  console.log("Payload a enviar:", JSON.stringify(payload));
-  
+  console.log('Payload a enviar:', JSON.stringify(payload))
+
   try {
     const res = await fetch(`${BACKEND_URL}/tickets/mint`, {
       method: 'POST',
