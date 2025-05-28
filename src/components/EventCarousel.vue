@@ -186,8 +186,9 @@ async function payTicket(priceETH) {
   return txHash
 }
 
+const mintedTxHash = ref(null)
 // Función que llama al backend para mintear el ticket
-async function mintTicket(txHash) {
+async function mintTicket() {
   const priceNumber = parseFloat(selectedEvent.price.replace(' ETH', ''))
 
   const payload = {
@@ -197,19 +198,20 @@ async function mintTicket(txHash) {
       date: selectedEvent.date,
       zone: zonaSeleccionada.value,
       seat: asientoSeleccionado.value,
-      price: priceNumber,
-      txHash: txHash,
-    },
+      price: priceNumber
+    }
   }
 
   try {
     const res = await fetch(`${BACKEND_URL}/tickets/mint`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(payload)
     })
+
     if (!res.ok) throw new Error('Error minteando ticket')
-    await res.json()
+    const data = await res.json()
+    mintedTxHash.value = data.tx_hash
   } catch (error) {
     throw error
   }
@@ -248,6 +250,7 @@ const isAsientoDisponible = (zonaId, asiento) => {
   return !asientosVendidos.has(`${zonaId}-${asiento}`)
 }
 
+
 const confirmarCompra = async () => {
   if (!zonaSeleccionada.value || !asientoSeleccionado.value) return
   if (!isWalletConnected.value) {
@@ -261,13 +264,11 @@ const confirmarCompra = async () => {
   }
 
   try {
-    mensaje.value = 'Enviando transacción de pago...'
-    const txHash = await payTicket(selectedEvent.price.replace(' ETH', ''))
-    mensaje.value = 'Pago enviado. Transacción: ${txHash}. Minteando ticket...'
+    mensaje.value = 'Procesando compra y minteando ticket...'
+    await mintTicket()
+    mensaje.value = 'Ticket minteado con éxito.'
 
     asientosVendidos.add(key)
-
-    await mintTicket(txHash)
 
     mensaje.value = 'Ticket minteado con éxito.'
   } catch (error) {
@@ -342,7 +343,7 @@ const cargarAsientos = () => {
         <div class="modal-buttons">
           <button
             @click="confirmarCompra"
-            :disabled="!asientoSeleccionado"
+            :disabled="mensaje.includes('Enviando') || !asientoSeleccionado"
             style="background-color: greenyellow; border-radius: 9px; margin: 5px; padding: 5px"
           >
             <p id="22" style="font-size: large">Confirmar Compra</p>
@@ -363,6 +364,20 @@ const cargarAsientos = () => {
           }"
         >
           {{ mensaje }}
+        </p>
+
+        <p
+          v-if="mintedTxHash"
+          style="margin-top: 1rem; font-weight: bold; color: #000000;"
+        >
+          Transacción en Etherscan: 
+          <a
+            :href="`https://sepolia.etherscan.io/tx/0x${mintedTxHash}`"
+            target="_blank"
+            style="color: #1e88e5;"
+          >
+            {{ mintedTxHash.slice(0, 10) }}...
+          </a>
         </p>
       </div>
     </div>
