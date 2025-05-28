@@ -317,40 +317,56 @@ const cargarAsientos = () => {
           <img src="/src/assets/arena-mty.jpg" alt="Mapa Arena Monterrey" class="map-image" />
         </div>
 
-        <h3>Selecciona zona y asiento</h3>
+        <h3 style="font-weight: bold;">Selecciona zona y asiento</h3>
 
-        <label for="zona">Zona:</label>
-        <select id="zona" v-model="zonaSeleccionada" @change="cargarAsientos">
-          <option value="" disabled>Selecciona una zona</option>
-          <option v-for="zona in zonas" :key="zona.id" :value="zona.id">
-            {{ zona.nombre }}
-          </option>
-        </select>
+        <div style="display: flex; flex-direction: column; gap: 1rem; margin: 1rem 0;">
+          <div>
+            <label for="zona" style="font-weight: bold; display: block; margin-bottom: 0.3rem;">Zona:</label>
+            <select
+              id="zona"
+              v-model="zonaSeleccionada"
+              @change="cargarAsientos"
+              style="padding: 0.5rem; width: 100%; border-radius: 5px;"
+            >
+              <option value="" disabled>Selecciona una zona</option>
+              <option v-for="zona in zonas" :key="zona.id" :value="zona.id">
+                {{ zona.nombre }}
+              </option>
+            </select>
+          </div>
 
-        <label for="asiento">Asiento:</label>
-        <select id="asiento" v-model="asientoSeleccionado" :disabled="!zonaSeleccionada">
-          <option value="" disabled>Selecciona un asiento</option>
-          <option
-            v-for="asiento in asientosDisponibles"
-            :key="asiento"
-            :value="asiento"
-            :disabled="!isAsientoDisponible(zonaSeleccionada, asiento)"
-          >
-            {{ asiento }}
-          </option>
-        </select>
+          <div>
+            <label for="asiento" style="font-weight: bold; display: block; margin-bottom: 0.3rem;">Asiento:</label>
+            <select
+              id="asiento"
+              v-model="asientoSeleccionado"
+              :disabled="!zonaSeleccionada"
+              style="padding: 0.5rem; width: 100%; border-radius: 5px;"
+            >
+              <option value="" disabled>Selecciona un asiento</option>
+              <option
+                v-for="asiento in asientosDisponibles"
+                :key="asiento"
+                :value="asiento"
+                :disabled="!isAsientoDisponible(zonaSeleccionada, asiento)"
+              >
+                {{ asiento }}
+              </option>
+            </select>
+          </div>
+        </div>
 
         <div class="modal-buttons">
           <button
             @click="confirmarCompra"
             :disabled="mensaje.includes('Enviando') || !asientoSeleccionado"
-            style="background-color: greenyellow; border-radius: 9px; margin: 5px; padding: 5px"
+            style="background-color: #9cdb95; border-radius: 9px; margin: 5px; padding: 5px"
           >
             <p id="22" style="font-size: large">Confirmar Compra</p>
           </button>
           <button
             @click="closeModal"
-            style="background-color: red; border-radius: 9px; margin: 5px; padding: 5px"
+            style="background-color: #c95555; border-radius: 9px; margin: 5px; padding: 5px"
           >
             <p id="33" style="font-size: large">Cerrar</p>
           </button>
@@ -418,8 +434,20 @@ const cargarAsientos = () => {
 .carousel {
   display: flex;
   overflow-x: auto;
+  overflow-y: hidden; /* <--- evita scroll vertical */
   scroll-behavior: smooth;
   max-width: 90%;
+  padding: 1rem 0;
+  gap: 1rem;
+}
+
+.carousel::-webkit-scrollbar {
+  height: 6px;
+}
+
+.carousel::-webkit-scrollbar-thumb {
+  background-color: #062c49;
+  border-radius: 3px;
 }
 button {
   background: none;
@@ -450,6 +478,7 @@ button {
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
+  color: #000000;
 }
 .modal-buttons {
   margin-top: 1rem;
@@ -470,11 +499,12 @@ button {
 .subtitleee {
   font-size: small;
   font-weight: 600;
+  color: #1e384c;
 }
 .dateee {
   font-size: small;
   font-weight: 900;
-  color: magenta;
+  color: #03304f;
 }
 .priceee {
   font-size: small;

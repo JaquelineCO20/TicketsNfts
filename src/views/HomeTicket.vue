@@ -8,23 +8,21 @@ import EventCarousel from '../components/EventCarousel.vue'
     <div class="centro">
       <p class="texto-centro">Bienvenido a J|N Tickets</p>
       <p class="description">
-        Dónde podras encontrar boletos para los eventos mas TOP de este 2025
+        Donde podrás encontrar boletos para los eventos más TOP de este 2025
       </p>
     </div>
-    <h2 style="padding-left: 2rem">Eventos próximos</h2>
+    <h2 id="title">Eventos próximos</h2>
     <EventCarousel />
   </div>
 </template>
 <style scoped>
 .centro {
-  display: flex;
-  flex-direction: column;
-  background-color: #03304f;
-  width: 100%;
-  height: 150px;
-  margin-bottom: 10px;
-  justify-content: center;
-  align-items: center;
+  background-color: #062c49; 
+  color: white; 
+  text-align: center; 
+  padding: 2rem 1rem; 
+  width: 100vw; 
+  margin-left: calc(-50vw + 50%);
 }
 .texto-centro {
   color: #ffffff;
@@ -36,5 +34,11 @@ import EventCarousel from '../components/EventCarousel.vue'
   color: #ffffff;
   font-size: medium;
   font-weight: 300;
+}
+#title {
+  color: #062c49;
+  font-weight: 600;
+  padding-left: 2rem;
+  padding-top: 1rem;
 }
 </style>

@@ -1,23 +1,7 @@
 <script setup>
-import { ref, provide } from 'vue'
+import { useWallet } from '../composables/useWallet'
 
-const direccionWallet = ref(null)
-
-async function connectWallet() {
-  if (window.ethereum) {
-    try {
-      const cuentas = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      direccionWallet.value = cuentas[0]
-    } catch {
-      alert('Conexión cancelada o fallida')
-    }
-  } else {
-    alert('MetaMask no está instalado')
-  }
-}
-
-// Proveemos la dirección wallet para que otros componentes puedan inyectarla
-provide('direccionWallet', direccionWallet)
+const { direccionWallet, conectarWallet, desconectarWallet } = useWallet()
 </script>
 
 <template>
@@ -31,7 +15,7 @@ provide('direccionWallet', direccionWallet)
     <div class="nav-links">
       <router-link class="link" to="/">Inicio</router-link>
       <router-link class="link" to="/mis-tickets">Mis Tickets</router-link>
-      <button class="wallet-btn" @click="connectWallet">
+      <button class="wallet-btn"  @click="direccionWallet ? desconectarWallet() : conectarWallet()">
         {{
           direccionWallet
             ? direccionWallet.slice(0, 6) + '...' + direccionWallet.slice(-4)
